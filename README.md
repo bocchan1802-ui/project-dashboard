@@ -2,6 +2,31 @@
 
 マスターのためのプロジェクト管理ダッシュボード
 
+## 🚀 デプロイ状況
+
+- ✅ **GitHub**: https://github.com/bocchan1802-ui/project-dashboard
+- ⏳ **Cloudflare Pages**: Dashboardからデプロイ待ち
+
+## Cloudflare Pagesへのデプロイ手順
+
+### 方法1: DashboardからGitHub連携（推奨）
+
+1. [Cloudflare Dashboard](https://dash.cloudflare.com/4c8d6420e018a31ada15c0efb5bd13f9) にアクセス
+2. **Pages** → **プロジェクトを作成**
+3. **GitHubに接続** → `bocchan1802-ui/project-dashboard` を選択
+4. **ビルド設定**:
+   - フレームワークプリセット: `なし`
+   - ビルドコマンド: （空）
+   - 出力ディレクトリ: `/`
+5. **保存してデプロイ**
+
+### 方法2: ローカルで確認
+
+```bash
+cd /Users/clawd/.openclaw/workspace/project-dashboard
+open index.html
+```
+
 ## 機能
 
 - 📊 **プロジェクト一覧**: タイル形式で見やすく表示
@@ -9,18 +34,6 @@
 - 🔗 **URL表示**: 公開URLをワンクリックでアクセス
 - 💬 **コメント**: 各プロジェクトにコメント追加可能
 - 📱 **レスポンシブ**: モバイル対応
-
-## デプロイ方法
-
-### Cloudflare Pagesでホストする場合
-
-1. GitHubにpush
-2. Cloudflare Dashboard → Pages → 「プロジェクトを作成」
-3. GitHubリポジトリを選択
-4. フレームワークプリセット: なし（静的サイト）
-5. ビルドコマンド: （空）
-6. 出力ディレクトリ: `/`
-7. 「保存してデプロイ」
 
 ## プロジェクト追加方法
 
@@ -43,7 +56,7 @@
 }
 ```
 
-## 現在のプロジェクト
+## 現在のプロジェクト（8個）
 
 | プロジェクト | ステータス | URL |
 |------------|-----------|-----|
