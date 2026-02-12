@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ぼっちゃんプロジェクト管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #a0aec0;
+            font-size: 1.1rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #a0aec0;
+            margin-top: 5px;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .project-card.completed::before {
+            background: linear-gradient(90deg, #48bb78, #38a169);
+        }
+
+        .project-card.in-progress::before {
+            background: linear-gradient(90deg, #ed8936, #dd6b20);
+        }
+
+        .project-card.planned::before {
+            background: linear-gradient(90deg, #a0aec0, #718096);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.completed {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .status-badge.in-progress {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
+        .status-badge.planned {
+            background: rgba(160, 174, 192, 0.2);
+            color: #a0aec0;
+        }
+
+        .project-description {
+            color: #cbd5e0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .project-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .meta-tag {
+            background: rgba(102, 126, 234, 0.2);
+            color: #a3bffa;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+
+        .project-links {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .project-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .project-link.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .project-link.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+        }
+
+        .project-link:hover {
+            transform: scale(1.05);
+        }
+
+        .comments-section {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+        }
+
+        .comments-title {
+            font-size: 0.85rem;
+            color: #a0aec0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .comment {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            line-height: 1.5;
+        }
+
+        .comment-date {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .add-comment {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-comment input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .add-comment input::placeholder {
+            color: #718096;
+        }
+
+        .add-comment button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                gap: 15px;
+            }
+
+            .stat-card {
+                padding: 15px 20px;
+                min-width: 100px;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎩 ぼっちゃんプロジェクト管理</h1>
+        <p>マスターのためのプロジェクト管理ダッシュボード</p>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-number" id="total-projects">0</div>
+            <div class="stat-label">総プロジェクト</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="completed-projects">0</div>
+            <div class="stat-label">完了</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="in-progress-projects">0</div>
+            <div class="stat-label">進行中</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="planned-projects">0</div>
+            <div class="stat-label">計画中</div>
+        </div>
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">すべて</button>
+        <button class="filter-btn" data-filter="completed">完了</button>
+        <button class="filter-btn" data-filter="in-progress">進行中</button>
+        <button class="filter-btn" data-filter="planned">計画中</button>
+    </div>
+
+    <div class="projects-grid" id="projects-container">
+        <!-- Projects will be loaded here -->
+    </div>
+
+    <script>
+        // プロジェクトデータ
+        const projects = [
+            {
+                id: 1,
+                title: "🎮 エフェクト満載テトリス",
+                description: "Three.jsで派手なパーティクルエフェクトを搭載したテトリスゲーム。モバイル対応、効果音付き。",
+                status: "completed",
+                tags: ["Game", "Three.js", "Mobile"],
+                links: [
+                    { type: "primary", label: "🚀 プレイする", url: "https://856ecba9.tetris-effects.pages.dev" },
+                    { type: "secondary", label: "📁 GitHub", url: "https://github.com/bocchan1802-ui/tetris-effects" }
+                ],
+                comments: [
+                    { text: "ライン消去時のパーティクル演出が気持ちいい！", date: "2026-02-12" }
+                ]
+            },
+            {
+                id: 2,
+                title: "🤖 Telegram ボイスチャットボット",
+                description: "Voicevox（ずんだもん）とWhisperを使った音声対話ボット。音声入力→AI応答→音声出力。",
+                status: "completed",
+                tags: ["Bot", "Voice", "Python"],
+                links: [
+                    { type: "primary", label: "💬 @keiichiclawdbot", url: "https://t.me/keiichiclawdbot" }
+                ],
+                comments: [
+                    { text: "ずんだもんの声で応答するのが可愛いナリ", date: "2026-02-12" }
+                ]
+            },
+            {
+                id: 3,
+                title: "🎨 ゲームプロンプト生成システム",
+                description: "ChromaDBを使ったゲーム分析→画像生成プロンプト作成システム。Galaxianなどのアーケードゲームを分析。",
+                status: "completed",
+                tags: ["AI", "ChromaDB", "Python"],
+                links: [],
+                comments: [
+                    { text: "SD/Midjourney/DALL-E用のプロンプトを自動生成", date: "2026-02-12" }
+                ]
+            },
+            {
+                id: 4,
+                title: "📰 AIニュース監視システム",
+                description: "Claude/OpenClaw/GLM/Kimi/ElevenLabsの最新情報を1時間ごとに監視してSlackに通知。",
+                status: "completed",
+                tags: ["Automation", "Cron", "Slack"],
+                links: [],
+                comments: [
+                    { text: "毎時間自動で最新情報を収集してるナリ", date: "2026-02-12" }
+                ]
+            },
+            {
+                id: 5,
+                title: "🔧 Codex CLI セットアップ",
+                description: "OpenAIのCodex CLIを導入。自然言語でコーディング依頼が可能に。",
+                status: "completed",
+                tags: ["Tool", "OpenAI", "CLI"],
+                links: [],
+                comments: [
+                    { text: "マスターのChatGPT Plusプランで使えるナリ", date: "2026-02-12" }
+                ]
+            },
+            {
+                id: 6,
+                title: "☁️ Cloudflare環境構築",
+                description: "Wrangler CLIを導入し、Pages/Workers/D1/KV/R2が使えるようになった。",
+                status: "completed",
+                tags: ["Infrastructure", "Cloudflare"],
+                links: [
+                    { type: "secondary", label: "📊 Dashboard", url: "https://dash.cloudflare.com/4c8d6420e018a31ada15c0efb5bd13f9" }
+                ],
+                comments: [
+                    { text: "ぼっちゃん専用アカウントでデプロイ環境完成", date: "2026-02-12" }
+                ]
+            },
+            {
+                id: 7,
+                title: "🎙️ Voicevox セットアップ",
+                description: "ずんだもん音声合成エンジンの導入。ローカルで高品質な日本語TTSが可能に。",
+                status: "completed",
+                tags: ["Voice", "TTS", "ずんだもん"],
+                links: [],
+                comments: [
+                    { text: "Speaker ID 3のノーマル音声が良い感じナリ", date: "2026-02-12" }
+                ]
+            },
+            {
+                id: 8,
+                title: "📱 iOS React Native 音声アプリ",
+                description: "iOS用の音声入力・再生アプリ。現在要望確認中。",
+                status: "planned",
+                tags: ["iOS", "React Native", "Voice"],
+                links: [],
+                comments: [
+                    { text: "別スレッドで詳細を確認する必要あり", date: "2026-02-12" }
+                ]
+            }
+        ];
+
+        // 統計を更新
+        function updateStats() {
+            const total = projects.length;
+            const completed = projects.filter(p => p.status === 'completed').length;
+            const inProgress = projects.filter(p => p.status === 'in-progress').length;
+            const planned = projects.filter(p => p.status === 'planned').length;
+
+            document.getElementById('total-projects').textContent = total;
+            document.getElementById('completed-projects').textContent = completed;
+            document.getElementById('in-progress-projects').textContent = inProgress;
+            document.getElementById('planned-projects').textContent = planned;
+        }
+
+        // プロジェクトカードを生成
+        function createProjectCard(project) {
+            const linksHtml = project.links.map(link => `
+                <a href="${link.url}" class="project-link ${link.type}" target="_blank">
+                    ${link.label}
+                </a>
+            `).join('');
+
+            const tagsHtml = project.tags.map(tag => `
+                <span class="meta-tag">${tag}</span>
+            `).join('');
+
+            const commentsHtml = project.comments.map(comment => `
+                <div class="comment">
+                    ${comment.text}
+                    <div class="comment-date">${comment.date}</div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="project-card ${project.status}" data-status="${project.status}">
+                    <div class="project-header">
+                        <h3 class="project-title">${project.title}</h3>
+                        <span class="status-badge ${project.status}">
+                            ${project.status === 'completed' ? '完了' : 
+                              project.status === 'in-progress' ? '進行中' : '計画中'}
+                        </span>
+                    </div>
+                    <p class="project-description">${project.description}</p>
+                    <div class="project-meta">
+                        ${tagsHtml}
+                    </div>
+                    ${linksHtml ? `<div class="project-links">${linksHtml}</div>` : ''}
+                    <div class="comments-section">
+                        <div class="comments-title">💬 コメント</div>
+                        ${commentsHtml}
+                        <div class="add-comment">
+                            <input type="text" placeholder="コメントを追加..." data-project-id="${project.id}">
+                            <button onclick="addComment(${project.id})">追加</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // プロジェクトを表示
+        function renderProjects(filter = 'all') {
+            const container = document.getElementById('projects-container');
+            const filteredProjects = filter === 'all' 
+                ? projects 
+                : projects.filter(p => p.status === filter);
+
+            if (filteredProjects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>該当するプロジェクトがありません</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredProjects.map(createProjectCard).join('');
+        }
+
+        // コメント追加
+        function addComment(projectId) {
+            const input = document.querySelector(`input[data-project-id="${projectId}"]`);
+            const text = input.value.trim();
+            
+            if (text) {
+                const project = projects.find(p => p.id === projectId);
+                project.comments.push({
+                    text: text,
+                    date: new Date().toISOString().split('T')[0]
+                });
+                renderProjects(document.querySelector('.filter-btn.active').dataset.filter);
+            }
+        }
+
+        // フィルターボタンのイベント
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderProjects(btn.dataset.filter);
+            });
+        });
+
+        // 初期化
+        updateStats();
+        renderProjects();
+    </script>
+</body>
+</html>
