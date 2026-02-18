@@ -7,6 +7,8 @@ on:
   workflow_dispatch:  # 手動実行も可能
   issues:
     types: [opened, edited, closed, reopened, labeled]  # Issue更新時に実行
+  push:
+    branches: [main]  # mainブランチにpush時も実行（スクリプト更新時など）
 
 jobs:
   update:
