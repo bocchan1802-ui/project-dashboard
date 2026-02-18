@@ -5,6 +5,7 @@ GitHub Issuesからプロジェクトダッシュボードを生成するスク�
 
 import os
 import json
+import re
 from datetime import datetime
 import requests
 
@@ -50,6 +51,9 @@ def fetch_issues():
 def parse_issue_body(body):
     """Issue本文を解析"""
     fields = {
+        'project_name': '',
+        'description': '',
+        'status': '',
         'current_task': '',
         'blockers': '',
         'tags': '',
@@ -58,16 +62,48 @@ def parse_issue_body(body):
     }
 
     current_field = None
-    for line in body.split('\n'):
-        line = line.strip()
+    lines = body.split('\n')
+
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+
+        # ヘッダー（###）を検出
         if line.startswith('###'):
-            field_key = line.lower().replace('###', '').strip().replace(' ', '_')
-            current_field = field_key
-        elif current_field and line:
-            if fields.get(current_field):
-                fields[current_field] += '\n' + line
-            else:
-                fields[current_field] = line
+            field_name = line.replace('###', '').strip()
+
+            # 空行をスキップして次の行から値を取得
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+
+            # 値を取得
+            value_lines = []
+            while j < len(lines) and lines[j].strip() and not lines[j].strip().startswith('###'):
+                value_lines.append(lines[j].strip())
+                j += 1
+
+            field_value = '\n'.join(value_lines)
+
+            # フィールド名に基づいてマッピング
+            if 'プロジェクト名' in field_name:
+                fields['project_name'] = field_value
+            elif 'プロジェクトの説明' in field_name:
+                fields['description'] = field_value
+            elif 'ステータス' in field_name:
+                fields['status'] = field_value
+            elif '今何をしているか' in field_name:
+                fields['current_task'] = field_value
+            elif 'なんで止まっているか' in field_name:
+                fields['blockers'] = field_value
+            elif 'タグ' in field_name:
+                fields['tags'] = field_value
+            elif 'デモURL' in field_name:
+                fields['demo_url'] = field_value
+            elif 'GitHubリポジトリURL' in field_name:
+                fields['repo_url'] = field_value
+
+        i += 1
 
     return fields
 
@@ -128,10 +164,15 @@ def generate_html(issues):
                 'date': datetime.fromisoformat(issue['updated_at']).strftime('%Y-%m-%d')
             })
 
+        # タイトルから[プロジェクト]プレフィックスを削除
+        title = issue['title']
+        if title.startswith('[プロジェクト] '):
+            title = title.replace('[プロジェクト] ', '')
+
         project = {
             'id': issue['id'],
-            'title': issue['title'],
-            'description': issue['body'].split('\n')[0] if issue['body'] else '',
+            'title': title,
+            'description': fields['description'],
             'status': status,
             'tags': tags,
             'links': links,
