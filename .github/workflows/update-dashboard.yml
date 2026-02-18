@@ -1,0 +1,45 @@
+name: Update Project Dashboard
+
+on:
+  schedule:
+    # 6時間ごとに実行（JST: 0, 6, 12, 18時 = UTC: 15, 21, 3, 9時）
+    - cron: '0 */6 * * *'
+  workflow_dispatch:  # 手動実行も可能
+  issues:
+    types: [opened, edited, closed, reopened, labeled]  # Issue更新時に実行
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Fetch GitHub Issues and Generate HTML
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          cd scripts
+          python generate_dashboard.py
+
+      - name: Commit and Push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Update dashboard from GitHub Issues [skip ci]" && git push)

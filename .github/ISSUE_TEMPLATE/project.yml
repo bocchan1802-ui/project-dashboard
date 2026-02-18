@@ -1,0 +1,68 @@
+name: 🚀 プロジェクト追加
+description: 新しいプロジェクトを追加する
+title: "[プロジェクト] "
+labels: [project]
+body:
+  - type: input
+    id: project-name
+    attributes:
+      label: プロジェクト名
+      description: プロジェクトの名前（絵文字付きで！）
+      placeholder: "🎮 エフェクト満載テトリス"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: プロジェクトの説明
+      description: プロジェクトの概要
+      placeholder: "Three.jsで派手なパーティクルエフェクトを搭載したテトリスゲーム..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: ステータス
+      description: 現在の進捗状況
+      options:
+        - 計画中
+        - 進行中
+        - 完了
+        - 保留
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-task
+    attributes:
+      label: 今何をしているか
+      description: 現在取り組んでいる作業内容
+      placeholder: "Three.jsでパーティクルエフェクトを実装中..."
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: なんで止まっているか
+      description: 問題点、課題、次にやるべきことなど
+      placeholder: "モバイルでのコントロール実装方法を検討中..."
+
+  - type: input
+    id: tags
+    attributes:
+      label: タグ
+      description: カンマ区切りで入力
+      placeholder: "Game, Three.js, Mobile"
+
+  - type: input
+    id: demo-url
+    attributes:
+      label: デモURL（あれば）
+      placeholder: "https://..."
+
+  - type: input
+    id: repo-url
+    attributes:
+      label: GitHubリポジトリURL（あれば）
+      placeholder: "https://github.com/..."
